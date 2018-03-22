@@ -41,13 +41,13 @@ public final class Communications implements SerialPortEventListener
     private SerialPort serialPort;
     private final Decoder decoder;
 
-    private static final byte PACKET_START_BYTE = 0x5b;
-    private static final byte PACKET_END_BYTE = 0x5d;
-    private static final int PACKET_LENGTH = 42;
+    private static final byte PACKET_END_BYTE_1 = 0x0D;
+    private static final byte PACKET_END_BYTE_2 = 0x0A;
+    private static final int PACKET_LENGTH = 45;
 
     private final byte[] packetBuffer = new byte[PACKET_LENGTH + 1];
+    private boolean packetEndByte1 = false;
     private int packetBufferPosition = 0;
-    private boolean packetBufferActive = false;
 
     /**
      * Used by {@link #bytesToHex(byte[])}
@@ -112,6 +112,12 @@ public final class Communications implements SerialPortEventListener
                 {
                     byte[] rxBuffer = serialPort.readBytes();
 
+                    if (rxBuffer == null)
+                    {
+                        // Serial input buffer is empty.
+                        return;
+                    }
+
                     for (int byteCount = 0; byteCount < rxBuffer.length; byteCount ++)
                     {
                         packetBuffer[packetBufferPosition] = rxBuffer[byteCount];
@@ -120,27 +126,39 @@ public final class Communications implements SerialPortEventListener
                         if (packetBufferPosition >= PACKET_LENGTH)
                         {
                             // Reset for next packet
-                            packetBufferActive = false;
+                            clearPacketBuffer();
                             packetBufferPosition = 0;
+                            continue;
                         }
-                        else if (packetBufferActive)
-                        {
-                            packetBufferPosition ++;
 
-                            if ((packetBufferPosition == PACKET_LENGTH) && (packetBuffer[packetBufferPosition] == PACKET_END_BYTE))
+                        // First end byte already detected.
+                        if (packetEndByte1)
+                        {
+                            if (packetBuffer[packetBufferPosition] == PACKET_END_BYTE_2)
                             {
                                 // We have a full valid packet, decode it.
-                                decoder.decodeSerialData(packetBuffer);
+                                //decoder.decodeSerialData(packetBuffer);
 
                                 // Print valid packet in hex (debugging).
-                                //System.out.println(bytesToHex(packetBuffer));
+                                // TODO: 20180322 DJC: Comment this out for production.
+                                System.out.println(bytesToHex(packetBuffer));
+
+                                clearPacketBuffer();
+                                packetBufferPosition = 0;
+                                continue;
+                            }
+                            else
+                            {
+                                packetEndByte1 = false;
                             }
                         }
-                        else if (packetBuffer[0] == PACKET_START_BYTE)
+
+                        if (packetBuffer[packetBufferPosition] == PACKET_END_BYTE_1)
                         {
-                            packetBufferActive = true;
-                            packetBufferPosition = 1;
+                            packetEndByte1 = true;
                         }
+
+                        packetBufferPosition ++;
                     }
                 }
                 catch (SerialPortException | ProtocolException e)
@@ -153,6 +171,15 @@ public final class Communications implements SerialPortEventListener
 
             default:
                 break;
+        }
+    }
+
+
+    public void clearPacketBuffer()
+    {
+        for (int byteCount = 0; byteCount < packetBuffer.length; byteCount ++)
+        {
+            packetBuffer[byteCount] = 0x00;
         }
     }
 

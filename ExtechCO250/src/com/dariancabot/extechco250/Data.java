@@ -437,7 +437,7 @@ public final class Data
         /**
          * Gets the value represented as a String that resembles what is displayed on the LCD.
          *
-         * This also includes non-numerical values (i.e. words on LCD like "Shrt", "OPEn").
+         * This also includes non-numerical values.
          * <p>
          * For an exact representation (including whitespace), use the {@link #getValueVerbatim() getValueVerbatim} method.
          * <p>
@@ -454,9 +454,9 @@ public final class Data
         /**
          * Gets a more accurate representation what the value looks like on the ExtechCO250 LCD including whitespace padding, etc.
          *
-         * This also includes non-numerical values (i.e. words on LCD like "Shrt", "OPEn").
+         * This also includes non-numerical values.
          *
-         * @return String value that accurately representd Protek LCD.
+         * @return String value that accurately represents Extech LCD.
          */
         public String getValueVerbatim()
         {
@@ -467,7 +467,7 @@ public final class Data
         /**
          * Gets the value as a Double if numerical, otherwise returns null.
          *
-         * @return a Double value if numerical, or null if not-numerical (i.e. words on LCD like "Shrt", "OPEn").
+         * @return a Double value if numerical, or null if not-numerical.
          */
         public Double getValueDouble()
         {
@@ -485,7 +485,7 @@ public final class Data
         /**
          * Match a number with optional '-' and decimal.
          *
-         * Note: Will fail if non-latin (i.e. 0 to 9) digits used (for example, arabic digits).
+         * Note: Will fail if non-latin (i.e. 0 to 9) digits used (for example, Arabic digits).
          *
          * @see http://stackoverflow.com/a/1102916
          *
