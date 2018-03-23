@@ -23,6 +23,7 @@
  */
 package com.dariancabot.extechco250;
 
+import com.dariancabot.extechco250.Data.Value.Unit.Measurement;
 import com.dariancabot.extechco250.exceptions.ProtocolException;
 import java.nio.charset.Charset;
 import java.util.Arrays;
@@ -109,9 +110,86 @@ public final class Decoder
         else
         {
             // This is the live values line.
-            // TODO: 20180323 DJC: Interpret all the values...
-            //
             data.packet = packet; // Set the packet value.
+
+            // Convert to String - excluding last two checksum characters.
+            String dataPacket = new String(packet, 0, packet.length - 2);
+
+            // Split into sections at each ':' colon character.
+            String[] vals = dataPacket.split(":");
+
+            // Check each section by leading character, then parse to nuerical value, and update data model.
+            for (String val : vals)
+            {
+                switch (val.substring(0, 1))
+                {
+                    case "C": // CO2.
+                        data.co2Value.setValue(val.substring(1, val.length() - 3));
+
+                        if (val.contains("ppm"))
+                        {
+                            data.co2Value.unit.setMeasurement(Measurement.PPM);
+                        }
+
+                        break;
+
+                    case "T": // Air / dry-bulb temperature.
+                        data.dbtValue.setValue(val.substring(1, val.length() - 1));
+
+                        if (val.substring(val.length() - 1).equals("C"))
+                        {
+                            data.dbtValue.unit.setMeasurement(Measurement.CELCIUS);
+                        }
+                        else if (val.substring(val.length() - 1).equals("F"))
+                        {
+                            data.dbtValue.unit.setMeasurement(Measurement.FARENHEIT);
+                        }
+
+                        break;
+
+                    case "H": // Relative humidity.
+                        data.rhValue.setValue(val.substring(1, val.length() - 1));
+
+                        if (val.substring(val.length() - 1).equals("%"))
+                        {
+                            data.rhValue.unit.setMeasurement(Measurement.PERCENT);
+                        }
+
+                        break;
+
+                    case "d": // Dew-point temperature.
+                        data.dptValue.setValue(val.substring(1, val.length() - 1));
+
+                        if (val.substring(val.length() - 1).equals("C"))
+                        {
+                            data.dptValue.unit.setMeasurement(Measurement.CELCIUS);
+                        }
+                        else if (val.substring(val.length() - 1).equals("F"))
+                        {
+                            data.dptValue.unit.setMeasurement(Measurement.FARENHEIT);
+                        }
+
+                        break;
+
+                    case "w": // Wet-bulb temperature.
+                        data.wbtValue.setValue(val.substring(1, val.length() - 1));
+
+                        if (val.substring(val.length() - 1).equals("C"))
+                        {
+                            data.wbtValue.unit.setMeasurement(Measurement.CELCIUS);
+                        }
+                        else if (val.substring(val.length() - 1).equals("F"))
+                        {
+                            data.wbtValue.unit.setMeasurement(Measurement.FARENHEIT);
+                        }
+
+                        break;
+
+                    default:
+                        ProtocolException ex = new ProtocolException("Decode error: Unknown value designator '" + val.substring(0, 1) + "'.");
+                        throw ex;
+                }
+            }
 
             // Notify using the event listener if one is set.
             if (eventListener != null)

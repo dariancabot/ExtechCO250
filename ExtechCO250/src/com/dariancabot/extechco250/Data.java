@@ -112,8 +112,8 @@ public final class Data
             {
                 NONE(null, null),
                 PPM("ppm", "Parts Per Million"),
-                CELCIUS("C", "Celcius"),
-                FARENHEIT("F", "Farenheit"),
+                CELCIUS("°C", "Celcius"),
+                FARENHEIT("°F", "Farenheit"),
                 PERCENT("%", "Percent");
 
                 private final String abbreviation;

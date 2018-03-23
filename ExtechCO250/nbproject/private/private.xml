@@ -5,9 +5,6 @@
         <group>
             <file>file:/C:/Development/protek-608/ExtechCO250/ExtechCO250/src/com/dariancabot/extechco250/ExtechCO250.java</file>
         </group>
-        <group name="NEX controller software">
-            <file>file:/C:/Development/extech-co250/ExtechCO250/src/com/dariancabot/extechco250/Communications.java</file>
-            <file>file:/C:/Development/extech-co250/ExtechCO250/src/com/dariancabot/extechco250/Decoder.java</file>
-        </group>
+        <group name="NEX controller software"/>
     </open-files>
 </project-private>

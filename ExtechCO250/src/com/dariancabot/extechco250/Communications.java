@@ -126,7 +126,7 @@ public final class Communications implements SerialPortEventListener
                         if (packetBufferPosition >= PACKET_LENGTH)
                         {
                             // Reset for next packet
-                            clearPacketBuffer();
+                            Arrays.fill(packetBuffer, (byte) 0); // Clear the packet buffer.
                             packetBufferPosition = 0;
                             continue;
                         }
@@ -136,15 +136,20 @@ public final class Communications implements SerialPortEventListener
                         {
                             if (packetBuffer[packetBufferPosition] == PACKET_END_BYTE_2)
                             {
-                                // We have a valid packet - get the relevent section and decode it.
-                                byte[] packet = Arrays.copyOfRange(packetBuffer, 0, packetBufferPosition);
+
+                                // We have a valid packet - get the relevent section.
+                                byte[] packet = Arrays.copyOfRange(packetBuffer, 0, packetBufferPosition + 1);
+
+                                // TODO: Comment this out for production...
+                                // Print valid packet in hex (debugging)...
+                                // System.out.println(bytesToHex(packet)); // Hex format.
+                                // System.out.println(new String(packet, 0, packet.length)); // ASCII format.
+                                //
+                                // Decode the packet.
                                 decoder.decodePacket(packet);
 
-                                // Print valid packet in hex (debugging).
-                                // TODO: 20180322 DJC: Comment this out for production.
-                                System.out.println(bytesToHex(packet));
-
-                                clearPacketBuffer();
+                                // Reset buffer ready for the next packet...
+                                Arrays.fill(packetBuffer, (byte) 0); // Clear the packet buffer.
                                 packetBufferPosition = 0;
                                 continue;
                             }
@@ -176,15 +181,6 @@ public final class Communications implements SerialPortEventListener
     }
 
 
-    public void clearPacketBuffer()
-    {
-        for (int byteCount = 0; byteCount < packetBuffer.length; byteCount ++)
-        {
-            packetBuffer[byteCount] = 0x00;
-        }
-    }
-
-
     //-----------------------------------------------------------------------
     /**
      * Converts a byte array into a hex String.
@@ -197,12 +193,13 @@ public final class Communications implements SerialPortEventListener
      */
     private String bytesToHex(byte[] bytes)
     {
-        char[] hexChars = new char[bytes.length * 2];
+        char[] hexChars = new char[bytes.length * 3];
         for (int j = 0; j < bytes.length; j ++)
         {
             int v = bytes[j] & 0xFF;
-            hexChars[j * 2] = HEX_ARRAY[v >>> 4];
-            hexChars[j * 2 + 1] = HEX_ARRAY[v & 0x0F];
+            hexChars[j * 3] = HEX_ARRAY[v >>> 4];
+            hexChars[j * 3 + 1] = HEX_ARRAY[v & 0x0F];
+            hexChars[j * 3 + 2] = 0x20; // Space character.
         }
 
         return new String(hexChars);
