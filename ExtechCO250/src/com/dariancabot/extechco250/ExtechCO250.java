@@ -185,7 +185,6 @@ public final class ExtechCO250
         catch (SerialPortException ex)
         {
             System.err.println(ex);
-
             return false;
         }
     }

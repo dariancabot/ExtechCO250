@@ -21,10 +21,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-// TODO: DJC 20180321: Convert from Protek 608 to Extech CO250.
 package com.dariancabot.extechco250;
 
 import com.dariancabot.extechco250.exceptions.ProtocolException;
+import java.util.Arrays;
 import jssc.SerialPort;
 import jssc.SerialPortEvent;
 import jssc.SerialPortEventListener;
@@ -41,8 +41,8 @@ public final class Communications implements SerialPortEventListener
     private SerialPort serialPort;
     private final Decoder decoder;
 
-    private static final byte PACKET_END_BYTE_1 = 0x0D;
-    private static final byte PACKET_END_BYTE_2 = 0x0A;
+    private static final byte PACKET_END_BYTE_1 = 0x0d;
+    private static final byte PACKET_END_BYTE_2 = 0x0a;
     private static final int PACKET_LENGTH = 45;
 
     private final byte[] packetBuffer = new byte[PACKET_LENGTH + 1];
@@ -52,7 +52,7 @@ public final class Communications implements SerialPortEventListener
     /**
      * Used by {@link #bytesToHex(byte[])}
      */
-    final protected static char[] hexArray = "0123456789abcdef".toCharArray();
+    final protected static char[] HEX_ARRAY = "0123456789abcdef".toCharArray();
 
 
     //-----------------------------------------------------------------------
@@ -136,12 +136,13 @@ public final class Communications implements SerialPortEventListener
                         {
                             if (packetBuffer[packetBufferPosition] == PACKET_END_BYTE_2)
                             {
-                                // We have a full valid packet, decode it.
-                                //decoder.decodeSerialData(packetBuffer);
+                                // We have a valid packet - get the relevent section and decode it.
+                                byte[] packet = Arrays.copyOfRange(packetBuffer, 0, packetBufferPosition);
+                                decoder.decodePacket(packet);
 
                                 // Print valid packet in hex (debugging).
                                 // TODO: 20180322 DJC: Comment this out for production.
-                                System.out.println(bytesToHex(packetBuffer));
+                                System.out.println(bytesToHex(packet));
 
                                 clearPacketBuffer();
                                 packetBufferPosition = 0;
@@ -194,14 +195,14 @@ public final class Communications implements SerialPortEventListener
      *
      * @see http://stackoverflow.com/a/9855338
      */
-    public static String bytesToHex(byte[] bytes)
+    private String bytesToHex(byte[] bytes)
     {
         char[] hexChars = new char[bytes.length * 2];
         for (int j = 0; j < bytes.length; j ++)
         {
             int v = bytes[j] & 0xFF;
-            hexChars[j * 2] = hexArray[v >>> 4];
-            hexChars[j * 2 + 1] = hexArray[v & 0x0F];
+            hexChars[j * 2] = HEX_ARRAY[v >>> 4];
+            hexChars[j * 2 + 1] = HEX_ARRAY[v & 0x0F];
         }
 
         return new String(hexChars);

@@ -61,14 +61,9 @@ public final class Data
     public Value wbtValue = new Value();
 
     /**
-     * The packet data direct from the communications buffer.
+     * The packet data without the end bytes.
      */
-    public byte[] packetRaw = null;
-
-    /**
-     * The packet data without the start/end bytes.
-     */
-    public byte[] packetTidy = null;
+    public byte[] packet = null;
 
 
     /**
